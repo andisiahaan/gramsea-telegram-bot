@@ -1,0 +1,19 @@
+{
+    "name": "andisiahaan/gramsea-telegram-bot",
+    "description": "Gramsea is a simple telegram bot API library",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Andisiahaan\\GramseaTelegramBot\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Andi Saputra Siahaan",
+            "email": "andisiahaan670@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
