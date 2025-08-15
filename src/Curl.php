@@ -1,34 +1,55 @@
 <?php
 
-namespace Andisiahaan\GramseaTelegramBot;
+declare(strict_types=1);
+
+namespace AndiSiahaan\GramseaTelegramBot;
+
+use AndiSiahaan\GramseaTelegramBot\Exception\NetworkException;
 
 class Curl
 {
     public static function request(string $url, array $parameters = [], string $method = 'GET'): array
     {
-        // Tentukan batas karakter untuk key "text"
-        $maxTextLength = 2000;
-
-        // Jika key "text" ada dan panjangnya lebih dari batas, ubah metode ke POST
-        if (isset($parameters['text']) && is_string($parameters['text']) && strlen($parameters['text']) > $maxTextLength) {
-            $method = 'POST';
-        }
-
         $ch = curl_init();
+
+        $headers = [];
+
+        // Detect if there's a file-like value for multipart
+        $isMultipart = false;
+        foreach ($parameters as $k => $v) {
+            if (is_string($v) && (str_starts_with($v, '@') || file_exists((string) $v))) {
+                $isMultipart = true;
+                break;
+            }
+        }
 
         $options = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
         ];
 
-        if ($method === 'POST') {
-            $options[CURLOPT_POST] = true;
-            $options[CURLOPT_POSTFIELDS] = json_encode($parameters);
+        if ($method === 'GET' && count($parameters) > 0) {
+            $options[CURLOPT_URL] = $url . '?' . http_build_query($parameters);
+        } else {
             $options[CURLOPT_URL] = $url;
-        } else { // GET
-            $queryString = http_build_query($parameters);
-            $options[CURLOPT_URL] = $url . '?' . $queryString;
+            $options[CURLOPT_POST] = true;
+
+            if ($isMultipart) {
+                foreach ($parameters as $k => $v) {
+                    if (is_string($v) && file_exists($v)) {
+                        $parameters[$k] = new \CURLFile($v);
+                    }
+                }
+
+                $options[CURLOPT_POSTFIELDS] = $parameters;
+            } else {
+                $headers[] = 'Content-Type: application/json';
+                $options[CURLOPT_POSTFIELDS] = json_encode($parameters);
+            }
+        }
+
+        if (!empty($headers)) {
+            $options[CURLOPT_HTTPHEADER] = $headers;
         }
 
         curl_setopt_array($ch, $options);
@@ -37,6 +58,16 @@ class Curl
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        return json_decode($response, true) ?? $response;
+        if ($response === false) {
+            throw new NetworkException('Curl error: ' . $error);
+        }
+
+        $decoded = json_decode($response, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        // return raw fallback as array
+        return ['ok' => false, 'raw' => $response, 'http_code' => $httpCode];
     }
 }

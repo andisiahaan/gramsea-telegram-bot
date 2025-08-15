@@ -1,1 +1,23 @@
-/vendor/
+/# Composer
+vendor/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Build / tools
+composer.phar
+node_modules/
+
+# Examples / temp
+examples/sample.jpg
+
+# PHPUnit
+/.phpunit.result.cache
