@@ -8,6 +8,8 @@ use AndiSiahaan\GramseaTelegramBot\Exception\ApiException;
 
 class Gramsea
 {
+    use HelperMethods;
+
     protected string $baseUrl;
 
     public function __construct(string $botToken)
