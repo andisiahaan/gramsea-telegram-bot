@@ -53,31 +53,41 @@ $bot->sendPhoto([
 ### Menggunakan Fluent Sender (Recommended)
 
 ```php
-use AndiSiahaan\GramseaTelegramBot\MessageSender;
+use AndiSiahaan\GramseaTelegramBot\Gramsea;
 use AndiSiahaan\GramseaTelegramBot\Support\InlineKeyboard;
 
+$bot = new Gramsea('YOUR_BOT_TOKEN');
+
 // Text message dengan keyboard
-MessageSender::bot($bot)
+$bot->message()
     ->to($chatId)
     ->text('Hello **world**!')  // Markdown otomatis dikonversi ke HTML
     ->keyboard(InlineKeyboard::make()->callback('Click Me', 'action'))
     ->send();
 
 // Photo dengan caption
-MessageSender::bot($bot)
+$bot->media()
     ->to($chatId)
     ->photo('https://example.com/image.jpg')
-    ->text('Check this out!')
+    ->caption('Check this out!')
     ->silent()
     ->send();
 
 // Media group (album)
-MessageSender::bot($bot)
+$bot->mediaGroup()
     ->to($chatId)
     ->photo('photo1.jpg')
     ->photo('photo2.jpg')
     ->video('video.mp4')
-    ->text('My album!')
+    ->caption('My album!')
+    ->send();
+
+// Text dengan link preview options
+$bot->text()
+    ->to($chatId)
+    ->text('Check this article!')
+    ->previewUrl('https://example.com/article')
+    ->largePreview()
     ->send();
 ```
 
@@ -97,6 +107,22 @@ $bot->sendMessage([...]);
 $bot->sendPhoto([...]);
 $bot->sendDocument([...]);
 // dll...
+```
+
+#### Sender Factory Methods
+
+```php
+// MessageSender - auto-delegates based on content
+$bot->message()->to($chatId)->text('Hello!')->send();
+
+// TextSender - text dengan link preview options
+$bot->text()->to($chatId)->text('Hello!')->noPreview()->send();
+
+// MediaSender - single media
+$bot->media()->to($chatId)->photo('url')->caption('Nice!')->send();
+
+// MediaGroupSender - album (2-10 items)
+$bot->mediaGroup()->to($chatId)->photo('a.jpg')->photo('b.jpg')->send();
 ```
 
 #### Webhook Management
