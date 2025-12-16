@@ -1,8 +1,15 @@
 {
     "name": "andisiahaan/gramsea-telegram-bot",
-    "description": "Gramsea is a simple telegram bot API library",
+    "description": "A simple and powerful PHP library for Telegram Bot API",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "telegram",
+        "telegram-bot",
+        "telegram-api",
+        "bot",
+        "gramsea"
+    ],
     "autoload": {
         "psr-4": {
             "AndiSiahaan\\GramseaTelegramBot\\": "src/"
@@ -17,12 +24,18 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.4"
+        "php": ">=8.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5|^10.0"
     },
     "scripts": {
         "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
     }
 }

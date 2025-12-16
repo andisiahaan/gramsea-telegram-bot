@@ -171,6 +171,299 @@ trait HelperMethods
     }
 
     /**
+     * Send upload_video action to a chat.
+     *
+     * @param int|string $chatId Target chat
+     */
+    public function sendUploadVideoAction(int|string $chatId): array
+    {
+        return $this->callMethod('sendChatAction', [
+            'chat_id' => $chatId,
+            'action' => 'upload_video',
+        ]);
+    }
+
+    /**
+     * Send record_video action to a chat.
+     *
+     * @param int|string $chatId Target chat
+     */
+    public function sendRecordVideoAction(int|string $chatId): array
+    {
+        return $this->callMethod('sendChatAction', [
+            'chat_id' => $chatId,
+            'action' => 'record_video',
+        ]);
+    }
+
+    /**
+     * Send record_voice action to a chat.
+     *
+     * @param int|string $chatId Target chat
+     */
+    public function sendRecordVoiceAction(int|string $chatId): array
+    {
+        return $this->callMethod('sendChatAction', [
+            'chat_id' => $chatId,
+            'action' => 'record_voice',
+        ]);
+    }
+
+    /**
+     * Send upload_voice action to a chat.
+     *
+     * @param int|string $chatId Target chat
+     */
+    public function sendUploadVoiceAction(int|string $chatId): array
+    {
+        return $this->callMethod('sendChatAction', [
+            'chat_id' => $chatId,
+            'action' => 'upload_voice',
+        ]);
+    }
+
+    /**
+     * Send choose_sticker action to a chat.
+     *
+     * @param int|string $chatId Target chat
+     */
+    public function sendChooseStickerAction(int|string $chatId): array
+    {
+        return $this->callMethod('sendChatAction', [
+            'chat_id' => $chatId,
+            'action' => 'choose_sticker',
+        ]);
+    }
+
+    /**
+     * Send any chat action.
+     *
+     * @param int|string $chatId Target chat
+     * @param string $action Action type
+     */
+    public function sendChatAction(int|string $chatId, string $action): array
+    {
+        return $this->callMethod('sendChatAction', [
+            'chat_id' => $chatId,
+            'action' => $action,
+        ]);
+    }
+
+    // =============================================
+    // Moderation Methods
+    // =============================================
+
+    /**
+     * Ban a user from a chat.
+     *
+     * @param int|string $chatId Target chat
+     * @param int $userId User to ban
+     * @param int|null $untilDate Unix timestamp when the user will be unbanned (0 or null = forever)
+     * @param bool $revokeMessages Delete all messages from the user
+     */
+    public function banChatMember(
+        int|string $chatId,
+        int $userId,
+        ?int $untilDate = null,
+        bool $revokeMessages = false
+    ): array {
+        $params = [
+            'chat_id' => $chatId,
+            'user_id' => $userId,
+        ];
+
+        if ($untilDate !== null && $untilDate > 0) {
+            $params['until_date'] = $untilDate;
+        }
+
+        if ($revokeMessages) {
+            $params['revoke_messages'] = true;
+        }
+
+        return $this->callMethod('banChatMember', $params);
+    }
+
+    /**
+     * Unban a user from a chat.
+     *
+     * @param int|string $chatId Target chat
+     * @param int $userId User to unban
+     * @param bool $onlyIfBanned Only unban if the user is currently banned
+     */
+    public function unbanChatMember(int|string $chatId, int $userId, bool $onlyIfBanned = true): array
+    {
+        return $this->callMethod('unbanChatMember', [
+            'chat_id' => $chatId,
+            'user_id' => $userId,
+            'only_if_banned' => $onlyIfBanned,
+        ]);
+    }
+
+    /**
+     * Restrict a user in a chat.
+     *
+     * @param int|string $chatId Target chat
+     * @param int $userId User to restrict
+     * @param array $permissions ChatPermissions array
+     * @param int|null $untilDate Unix timestamp when restrictions will be lifted
+     */
+    public function restrictChatMember(
+        int|string $chatId,
+        int $userId,
+        array $permissions,
+        ?int $untilDate = null
+    ): array {
+        $params = [
+            'chat_id' => $chatId,
+            'user_id' => $userId,
+            'permissions' => json_encode($permissions),
+        ];
+
+        if ($untilDate !== null && $untilDate > 0) {
+            $params['until_date'] = $untilDate;
+        }
+
+        return $this->callMethod('restrictChatMember', $params);
+    }
+
+    /**
+     * Promote a user to admin.
+     *
+     * @param int|string $chatId Target chat
+     * @param int $userId User to promote
+     * @param array $rights Admin rights to grant
+     */
+    public function promoteChatMember(int|string $chatId, int $userId, array $rights = []): array
+    {
+        $params = array_merge([
+            'chat_id' => $chatId,
+            'user_id' => $userId,
+        ], $rights);
+
+        return $this->callMethod('promoteChatMember', $params);
+    }
+
+    /**
+     * Mute a user (remove send message permission).
+     *
+     * @param int|string $chatId Target chat
+     * @param int $userId User to mute
+     * @param int|null $untilDate Unix timestamp when mute will be lifted
+     */
+    public function muteUser(int|string $chatId, int $userId, ?int $untilDate = null): array
+    {
+        return $this->restrictChatMember($chatId, $userId, [
+            'can_send_messages' => false,
+            'can_send_audios' => false,
+            'can_send_documents' => false,
+            'can_send_photos' => false,
+            'can_send_videos' => false,
+            'can_send_video_notes' => false,
+            'can_send_voice_notes' => false,
+            'can_send_polls' => false,
+            'can_send_other_messages' => false,
+        ], $untilDate);
+    }
+
+    /**
+     * Unmute a user (restore default permissions).
+     *
+     * @param int|string $chatId Target chat
+     * @param int $userId User to unmute
+     */
+    public function unmuteUser(int|string $chatId, int $userId): array
+    {
+        return $this->restrictChatMember($chatId, $userId, [
+            'can_send_messages' => true,
+            'can_send_audios' => true,
+            'can_send_documents' => true,
+            'can_send_photos' => true,
+            'can_send_videos' => true,
+            'can_send_video_notes' => true,
+            'can_send_voice_notes' => true,
+            'can_send_polls' => true,
+            'can_send_other_messages' => true,
+            'can_add_web_page_previews' => true,
+            'can_change_info' => false,
+            'can_invite_users' => true,
+            'can_pin_messages' => false,
+        ]);
+    }
+
+    /**
+     * Delete a message.
+     *
+     * @param int|string $chatId Target chat
+     * @param int $messageId Message ID to delete
+     */
+    public function deleteMessage(int|string $chatId, int $messageId): array
+    {
+        return $this->callMethod('deleteMessage', [
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+        ]);
+    }
+
+    /**
+     * Delete multiple messages.
+     *
+     * @param int|string $chatId Target chat
+     * @param array $messageIds Array of message IDs to delete
+     */
+    public function deleteMessages(int|string $chatId, array $messageIds): array
+    {
+        return $this->callMethod('deleteMessages', [
+            'chat_id' => $chatId,
+            'message_ids' => json_encode($messageIds),
+        ]);
+    }
+
+    /**
+     * Pin a message.
+     *
+     * @param int|string $chatId Target chat
+     * @param int $messageId Message ID to pin
+     * @param bool $disableNotification Disable notification for members
+     */
+    public function pinChatMessage(int|string $chatId, int $messageId, bool $disableNotification = false): array
+    {
+        return $this->callMethod('pinChatMessage', [
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+            'disable_notification' => $disableNotification,
+        ]);
+    }
+
+    /**
+     * Unpin a message.
+     *
+     * @param int|string $chatId Target chat
+     * @param int|null $messageId Message ID to unpin (null = unpin most recent)
+     */
+    public function unpinChatMessage(int|string $chatId, ?int $messageId = null): array
+    {
+        $params = ['chat_id' => $chatId];
+        
+        if ($messageId !== null) {
+            $params['message_id'] = $messageId;
+        }
+
+        return $this->callMethod('unpinChatMessage', $params);
+    }
+
+    /**
+     * Unpin all messages.
+     *
+     * @param int|string $chatId Target chat
+     */
+    public function unpinAllChatMessages(int|string $chatId): array
+    {
+        return $this->callMethod('unpinAllChatMessages', [
+            'chat_id' => $chatId,
+        ]);
+    }
+
+    /**
      * Get file download URL from file_id.
      *
      * @param string $fileId File identifier to get info about
