@@ -673,29 +673,99 @@ Curl::download('https://example.com/file.pdf', '/path/to/save.pdf');
 
 ### Exception Handling
 
+Library menyediakan exception classes yang spesifik untuk berbagai error dari Telegram API:
+
+| Exception | Error Code | Keterangan |
+|-----------|------------|------------|
+| `BadRequestException` | 400 | Parameter tidak valid |
+| `UnauthorizedException` | 401 | Bot token tidak valid |
+| `ForbiddenException` | 403 | Bot tidak punya akses (diblok, di-kick, dll) |
+| `NotFoundException` | 404 | Chat/user/message tidak ditemukan |
+| `ConflictException` | 409 | Conflict webhook/polling |
+| `TooManyRequestsException` | 429 | Rate limit tercapai |
+| `TelegramServerException` | 500+ | Server Telegram error |
+| `ApiException` | - | Base class untuk semua API errors |
+| `NetworkException` | - | Network/connection errors |
+
+#### Basic Usage
+
 ```php
 use AndiSiahaan\GramseaTelegramBot\Gramsea;
 use AndiSiahaan\GramseaTelegramBot\Exception\ApiException;
+use AndiSiahaan\GramseaTelegramBot\Exception\ForbiddenException;
+use AndiSiahaan\GramseaTelegramBot\Exception\TooManyRequestsException;
 use AndiSiahaan\GramseaTelegramBot\Exception\NetworkException;
 
 try {
     $bot->sendMessage([...]);
+} catch (ForbiddenException $e) {
+    // Bot diblok atau tidak punya akses
+    if ($e->isBotBlocked()) {
+        echo "User telah memblokir bot";
+    } elseif ($e->isBotKicked()) {
+        echo "Bot telah di-kick dari group";
+    }
+} catch (TooManyRequestsException $e) {
+    // Rate limited - tunggu dan retry
+    sleep($e->getWaitTime());
+    // retry...
 } catch (ApiException $e) {
-    echo "API Error: " . $e->getMessage();
-    echo "HTTP Code: " . $e->getHttpCode();
-    $response = $e->getResponse();
+    // Catch-all untuk API error lain
+    echo "Error: " . $e->getMessage();
+    echo "Code: " . $e->getErrorCode();
 } catch (NetworkException $e) {
-    echo "Network Error: " . $e->getMessage();
-    
-    // Check error type
+    // Network error (timeout, connection, SSL)
     if ($e->isTimeout()) {
         echo "Request timed out";
-    } elseif ($e->isConnectionError()) {
-        echo "Connection failed";
-    } elseif ($e->isSslError()) {
-        echo "SSL certificate error";
     }
 }
+```
+
+#### Exception Methods
+
+**ApiException (Base Class)**
+```php
+$e->getMessage();        // Pesan error dari Telegram
+$e->getErrorCode();      // HTTP error code (400, 403, 429, dll)
+$e->getDescription();    // Description dari Telegram response
+$e->getResponse();       // Full response array
+$e->getRetryAfter();     // Waktu tunggu (untuk rate limit), null jika tidak ada
+$e->getMigrateToChatId(); // Chat ID baru (untuk supergroup migration)
+$e->isRetryable();       // True jika error bisa di-retry
+```
+
+**ForbiddenException**
+```php
+$e->isBotBlocked();        // Bot diblok user
+$e->isBotKicked();         // Bot di-kick dari group
+$e->hasNoRightsToSend();   // Bot tidak punya hak kirim pesan
+$e->isUserDeactivated();   // User sudah dihapus/nonaktif
+```
+
+**NotFoundException**
+```php
+$e->isChatNotFound();      // Chat tidak ditemukan
+$e->isMessageNotFound();   // Message tidak ditemukan
+```
+
+**ConflictException**
+```php
+$e->isWebhookConflict();     // Conflict karena webhook
+$e->isGetUpdatesConflict();  // Conflict karena getUpdates aktif
+```
+
+**TooManyRequestsException**
+```php
+$e->getWaitTime();   // Waktu tunggu dalam detik (default 30)
+$e->isRetryable();   // Selalu true
+```
+
+**NetworkException**
+```php
+$e->getCurlErrorCode();  // cURL error code
+$e->isTimeout();         // Timeout error
+$e->isConnectionError(); // Connection error
+$e->isSslError();        // SSL certificate error
 ```
 
 ---
@@ -713,8 +783,15 @@ src/
 ├── Curl.php              # HTTP client
 ├── HelperMethods.php     # Trait helper methods
 ├── Exception/
-│   ├── ApiException.php
-│   └── NetworkException.php
+│   ├── ApiException.php           # Base exception untuk API errors
+│   ├── BadRequestException.php    # 400 errors
+│   ├── UnauthorizedException.php  # 401 errors
+│   ├── ForbiddenException.php     # 403 errors
+│   ├── NotFoundException.php      # 404 errors
+│   ├── ConflictException.php      # 409 errors
+│   ├── TooManyRequestsException.php # 429 rate limit
+│   ├── TelegramServerException.php  # 500+ server errors
+│   └── NetworkException.php       # Network/connection errors
 └── Support/
     ├── CallbackData.php   # Callback data encoder
     ├── Chat.php           # Chat object wrapper

@@ -5,6 +5,13 @@ declare(strict_types=1);
 namespace AndiSiahaan\GramseaTelegramBot;
 
 use AndiSiahaan\GramseaTelegramBot\Exception\ApiException;
+use AndiSiahaan\GramseaTelegramBot\Exception\BadRequestException;
+use AndiSiahaan\GramseaTelegramBot\Exception\UnauthorizedException;
+use AndiSiahaan\GramseaTelegramBot\Exception\ForbiddenException;
+use AndiSiahaan\GramseaTelegramBot\Exception\NotFoundException;
+use AndiSiahaan\GramseaTelegramBot\Exception\ConflictException;
+use AndiSiahaan\GramseaTelegramBot\Exception\TooManyRequestsException;
+use AndiSiahaan\GramseaTelegramBot\Exception\TelegramServerException;
 
 class Gramsea
 {
@@ -36,9 +43,26 @@ class Gramsea
         }
 
         $message = $response['description'] ?? 'Telegram API error';
-        $httpCode = $response['http_code'] ?? 0;
+        $errorCode = $response['error_code'] ?? ($response['http_code'] ?? 0);
 
-        throw new ApiException($message, $response, $httpCode);
+        throw $this->createException($message, $response, $errorCode);
+    }
+
+    /**
+     * Create specific exception based on error code.
+     */
+    protected function createException(string $message, array $response, int $errorCode): ApiException
+    {
+        return match (true) {
+            $errorCode === 400 => new BadRequestException($message, $response, $errorCode),
+            $errorCode === 401 => new UnauthorizedException($message, $response, $errorCode),
+            $errorCode === 403 => new ForbiddenException($message, $response, $errorCode),
+            $errorCode === 404 => new NotFoundException($message, $response, $errorCode),
+            $errorCode === 409 => new ConflictException($message, $response, $errorCode),
+            $errorCode === 429 => new TooManyRequestsException($message, $response, $errorCode),
+            $errorCode >= 500 => new TelegramServerException($message, $response, $errorCode),
+            default => new ApiException($message, $response, $errorCode),
+        };
     }
 
     public function getMe(): array
