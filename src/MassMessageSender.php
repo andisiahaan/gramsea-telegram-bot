@@ -158,7 +158,7 @@ class MassMessageSender
                     $result->addSuccess($chatId);
                 } else {
                     $errorCode = $body['error_code'] ?? 0;
-                    if (in_array($errorCode, [400, 403])) {
+                    if (in_array($errorCode, [400, 403, 404])) {
                         $result->addBlocked($chatId);
                     } else {
                         $result->addFailed($chatId);
@@ -173,7 +173,7 @@ class MassMessageSender
                     $response = $reason->getResponse();
                     if ($response) {
                         $statusCode = $response->getStatusCode();
-                        if (in_array($statusCode, [400, 403])) {
+                        if (in_array($statusCode, [400, 403, 404])) {
                             $result->addBlocked($chatId);
                             return;
                         }
@@ -229,8 +229,8 @@ class MassMessageSender
             return $this->buildMediaGroupRequest($chatId, $text, $media, $replyMarkup);
         }
 
-        // Fallback: no content, still try sendMessage
-        return $this->buildTextRequest($chatId, $text ?? '', $replyMarkup);
+        // Fallback: no text and no media is an error
+        throw new \InvalidArgumentException('Target must have text or media. chat_id: ' . $chatId);
     }
 
     /**
