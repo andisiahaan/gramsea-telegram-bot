@@ -233,7 +233,7 @@ class MassMessageSender
     /**
      * Build sendMessage request.
      */
-    protected function buildTextRequest(string $chatId, string $text, ?string $replyMarkup): Request
+    protected function buildTextRequest(int|string $chatId, string $text, ?string $replyMarkup): Request
     {
         $params = [
             'chat_id' => $chatId,
@@ -258,7 +258,7 @@ class MassMessageSender
     /**
      * Build single media request.
      */
-    protected function buildSingleMediaRequest(string $chatId, ?string $caption, string $mediaUrl, ?string $replyMarkup): Request
+    protected function buildSingleMediaRequest(int|string $chatId, ?string $caption, string $mediaUrl, ?string $replyMarkup): Request
     {
         $mediaType = MediaHelper::getMediaType($mediaUrl);
         $method = 'send' . ucfirst($mediaType);
@@ -291,7 +291,7 @@ class MassMessageSender
      * Build sendMediaGroup request.
      * Note: Media groups don't support reply_markup, so we send caption separately if keyboard provided.
      */
-    protected function buildMediaGroupRequest(string $chatId, ?string $caption, array $mediaUrls, ?string $replyMarkup): Request
+    protected function buildMediaGroupRequest(int|string $chatId, ?string $caption, array $mediaUrls, ?string $replyMarkup): Request
     {
         $mediaGroup = [];
         $isFirst = true;

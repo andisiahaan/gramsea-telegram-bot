@@ -15,7 +15,7 @@ use AndiSiahaan\GramseaTelegramBot\Support\InlineKeyboard;
 abstract class BaseSender
 {
     protected Gramsea $bot;
-    protected string $chatId = '';
+    protected int|string $chatId = '';
     protected ?array $replyMarkup = null;
     protected string $parseMode = 'HTML';
     protected bool $disableNotification = false;
@@ -51,7 +51,7 @@ abstract class BaseSender
     /**
      * Set target chat ID.
      */
-    public function to(string $chatId): static
+    public function to(int|string $chatId): static
     {
         $this->chatId = $chatId;
         return $this;
@@ -60,7 +60,7 @@ abstract class BaseSender
     /**
      * Alias untuk to().
      */
-    public function chat(string $chatId): static
+    public function chat(int|string $chatId): static
     {
         return $this->to($chatId);
     }

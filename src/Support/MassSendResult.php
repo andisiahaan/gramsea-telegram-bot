@@ -17,7 +17,7 @@ class MassSendResult
     /**
      * Add successful send.
      */
-    public function addSuccess(string $chatId): static
+    public function addSuccess(int|string $chatId): static
     {
         $this->sent[] = $chatId;
         return $this;
@@ -26,7 +26,7 @@ class MassSendResult
     /**
      * Add blocked (403/400 error).
      */
-    public function addBlocked(string $chatId): static
+    public function addBlocked(int|string $chatId): static
     {
         $this->blocked[] = $chatId;
         return $this;
@@ -35,7 +35,7 @@ class MassSendResult
     /**
      * Add failed (other errors).
      */
-    public function addFailed(string $chatId): static
+    public function addFailed(int|string $chatId): static
     {
         $this->failed[] = $chatId;
         return $this;
