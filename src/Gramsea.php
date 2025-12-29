@@ -149,4 +149,33 @@ class Gramsea
     {
         return $this->mediaGroup();
     }
+
+    /**
+     * Create MassMessageSender instance untuk concurrent mass sending.
+     * 
+     * @example
+     * $bot->mass()
+     *     ->addTarget(['chat_id' => '123', 'text' => 'Hello!'])
+     *     ->addTarget(['chat_id' => '456', 'text' => 'Hi!'])
+     *     ->send();
+     */
+    public function mass(): MassMessageSender
+    {
+        return MassMessageSender::make($this);
+    }
+    
+    
+    /**
+     * Alias untuk mass().
+     * 
+     * @example
+     * $bot->massMessage()
+     *     ->addTarget(['chat_id' => '123', 'text' => 'Hello!'])
+     *     ->addTarget(['chat_id' => '456', 'text' => 'Hi!'])
+     *     ->send();
+     */
+    public function massMessage(): MassMessageSender
+    {
+        return MassMessageSender::make($this);
+    }
 }

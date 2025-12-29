@@ -217,7 +217,7 @@ $content = $bot->downloadFile($fileId);
 
 ## 📨 Sender Classes
 
-Library menyediakan 4 sender class dengan fluent chaining API:
+Library menyediakan 5 sender class dengan fluent chaining API:
 
 | Class | Kegunaan |
 |-------|----------|
@@ -225,6 +225,7 @@ Library menyediakan 4 sender class dengan fluent chaining API:
 | `TextSender` | Khusus text message dengan link preview options |
 | `MediaSender` | Khusus single media (photo, video, audio, document) |
 | `MediaGroupSender` | Khusus media group/album (2-10 items) |
+| `MassMessageSender` | Concurrent mass sending ke banyak target sekaligus |
 
 ### MessageSender (Recommended)
 
@@ -361,6 +362,72 @@ Semua sender class memiliki method berikut:
 ->allowPaidBroadcast()  // Allow paid broadcast
 ->send()                // Execute
 ->reset()               // Reset state for reuse
+```
+
+---
+
+### MassMessageSender
+
+Untuk mengirim pesan secara concurrent ke banyak target sekaligus menggunakan Guzzle Pool.
+Setiap target memiliki konten sendiri (text, media, reply_markup).
+
+```php
+use AndiSiahaan\GramseaTelegramBot\MassMessageSender;
+
+// Fluent - addTarget satu per satu
+$result = $bot->mass()
+    ->addTarget([
+        'chat_id' => '123', 
+        'text' => 'Hello John!',
+        'media' => ['https://example.com/img.jpg'],
+        'reply_markup' => $keyboard
+    ])
+    ->addTarget([
+        'chat_id' => '456', 
+        'text' => 'Hi Jane!',
+        'media' => ['https://example.com/img2.jpg', 'https://example.com/vid.mp4']
+    ])
+    ->allowPaidBroadcast()
+    ->send();
+
+// Bulk - addTargets dari array
+$targets = [
+    ['chat_id' => '123', 'text' => 'Hello!'],
+    ['chat_id' => '456', 'text' => 'Hi!', 'media' => ['img.jpg']],
+];
+$result = $bot->mass()
+    ->addTargets($targets)
+    ->concurrency(50)  // default 30
+    ->send();
+```
+
+**Target Format:**
+- `chat_id` (required) - Target chat ID
+- `text` (optional) - Text pesan (supports markdown)
+- `media` (optional) - String atau array URL media
+- `reply_markup` (optional) - Keyboard (hasil dari ReplyMarkup class)
+
+**Result Methods (`MassSendResult`):**
+```php
+$result->totalSent();       // Jumlah sukses
+$result->totalBlocked();    // Jumlah blocked (403/400)
+$result->totalFailed();     // Jumlah gagal lainnya
+$result->totalProcessed();  // Total yang diproses
+$result->successRate();     // Persentase sukses
+
+$result->getSent();         // Array of chat_ids yang sukses
+$result->getBlocked();      // Array of chat_ids yang blocked
+$result->getFailed();       // Array of chat_ids yang failed
+$result->isAllSuccess();    // True jika semua sukses
+```
+
+**Global Options:**
+```php
+->concurrency(30)       // Set concurrent limit (default 30)
+->silent()              // Disable notification
+->protect()             // Protect content
+->allowPaidBroadcast()  // Allow paid broadcast
+->parseMode('HTML')     // Set parse mode
 ```
 
 ---
