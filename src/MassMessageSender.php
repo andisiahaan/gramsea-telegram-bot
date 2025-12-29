@@ -165,15 +165,18 @@ class MassMessageSender
                     }
                 }
             },
-            'rejected' => function (RequestException $reason, $index) use ($result) {
+            'rejected' => function (\Throwable $reason, $index) use ($result) {
                 $chatId = (string) $this->targets[$index]['chat_id'];
                 
-                $response = $reason->getResponse();
-                if ($response) {
-                    $statusCode = $response->getStatusCode();
-                    if (in_array($statusCode, [400, 403])) {
-                        $result->addBlocked($chatId);
-                        return;
+                // Only RequestException has getResponse()
+                if ($reason instanceof RequestException) {
+                    $response = $reason->getResponse();
+                    if ($response) {
+                        $statusCode = $response->getStatusCode();
+                        if (in_array($statusCode, [400, 403])) {
+                            $result->addBlocked($chatId);
+                            return;
+                        }
                     }
                 }
                 
