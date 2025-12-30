@@ -37,11 +37,11 @@ class MessageSender extends BaseSender
     }
 
     /**
-     * Set text pesan. Mendukung markdown sederhana yang dikonversi ke HTML.
+     * Set text pesan.
      */
     public function text(string $text): static
     {
-        $this->text = TextFormatter::markdownToHtml($text);
+        $this->text = $text;
         return $this;
     }
 

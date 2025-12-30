@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AndiSiahaan\GramseaTelegramBot;
 
 use AndiSiahaan\GramseaTelegramBot\Exception\ApiException;
-use AndiSiahaan\GramseaTelegramBot\Support\TextFormatter;
 
 /**
  * Fluent chaining sender untuk mengirim text message ke Telegram.
@@ -29,11 +28,11 @@ class TextSender extends BaseSender
     protected bool $linkPreviewAboveText = false;
 
     /**
-     * Set text pesan. Mendukung markdown sederhana yang dikonversi ke HTML.
+     * Set text pesan.
      */
     public function text(string $text): static
     {
-        $this->text = TextFormatter::markdownToHtml($text);
+        $this->text = $text;
         return $this;
     }
 

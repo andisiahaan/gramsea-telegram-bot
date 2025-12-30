@@ -201,11 +201,6 @@ class MassMessageSender
         $media = $target['media'] ?? [];
         $replyMarkup = $target['reply_markup'] ?? null;
 
-        // Convert text markdown to HTML
-        if ($text !== null) {
-            $text = TextFormatter::markdownToHtml($text);
-        }
-
         // Normalize media to array
         if (is_string($media)) {
             $media = [$media];
