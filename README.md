@@ -410,7 +410,7 @@ $result = $bot->mass()
 **Result Methods (`MassSendResult`):**
 ```php
 $result->totalSent();       // Jumlah sukses
-$result->totalBlocked();    // Jumlah blocked (403/400)
+$result->totalBlocked();    // Jumlah blocked (403/404)
 $result->totalFailed();     // Jumlah gagal lainnya
 $result->totalProcessed();  // Total yang diproses
 $result->successRate();     // Persentase sukses
