@@ -158,7 +158,7 @@ class MassMessageSender
                     $result->addSuccess($chatId);
                 } else {
                     $errorCode = $body['error_code'] ?? 0;
-                    if (in_array($errorCode, [400, 403, 404])) {
+                    if (in_array($errorCode, [403, 404])) {
                         $result->addBlocked($chatId);
                     } else {
                         $result->addFailed($chatId);
@@ -173,7 +173,7 @@ class MassMessageSender
                     $response = $reason->getResponse();
                     if ($response) {
                         $statusCode = $response->getStatusCode();
-                        if (in_array($statusCode, [400, 403, 404])) {
+                        if (in_array($statusCode, [403, 404])) {
                             $result->addBlocked($chatId);
                             return;
                         }

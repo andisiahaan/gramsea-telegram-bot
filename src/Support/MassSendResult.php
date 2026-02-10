@@ -24,7 +24,7 @@ class MassSendResult
     }
 
     /**
-     * Add blocked (403/400 error).
+     * Add blocked (403/404 error).
      */
     public function addBlocked(int|string $chatId): static
     {
